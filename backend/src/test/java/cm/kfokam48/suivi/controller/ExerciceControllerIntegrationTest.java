@@ -127,7 +127,9 @@ class ExerciceControllerIntegrationTest {
 
         Long exerciceId = exerciceRepository.findBySession_IdAndEtudiant_Id(sessionId, auteur.getId())
                 .orElseThrow().getId();
-        var relecture = relectureRepository.findByExercice_Id(exerciceId).orElseThrow();
-        org.assertj.core.api.Assertions.assertThat(relecture.getRelecteur().getId()).isEqualTo(autre.getId());
+        var relectures = relectureRepository.findByExercice_Id(exerciceId);
+        // Un seul autre étudiant présent (hors auteur) -> un seul relecteur assigné (RG7bis).
+        org.assertj.core.api.Assertions.assertThat(relectures).hasSize(1);
+        org.assertj.core.api.Assertions.assertThat(relectures.get(0).getRelecteur().getId()).isEqualTo(autre.getId());
     }
 }

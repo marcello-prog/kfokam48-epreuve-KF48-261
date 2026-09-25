@@ -1,12 +1,15 @@
 package cm.kfokam48.suivi.service;
 
 import cm.kfokam48.suivi.dto.DeposerExerciceRequest;
+import cm.kfokam48.suivi.dto.ExerciceAvecNoteResponse;
 import cm.kfokam48.suivi.entity.Etudiant;
 import cm.kfokam48.suivi.entity.Exercice;
+import cm.kfokam48.suivi.entity.Relecture;
 import cm.kfokam48.suivi.entity.Session;
 import cm.kfokam48.suivi.exception.ApiException;
 import cm.kfokam48.suivi.repository.EtudiantRepository;
 import cm.kfokam48.suivi.repository.ExerciceRepository;
+import cm.kfokam48.suivi.repository.RelectureRepository;
 import cm.kfokam48.suivi.repository.SessionRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -14,6 +17,7 @@ import org.springframework.stereotype.Service;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.Instant;
+import java.util.List;
 
 /**
  * EF7-8 · RG12, RG15 — dépôt du lien d'un exercice, jusqu'à la clôture de
@@ -26,15 +30,18 @@ public class ExerciceService {
     private final EtudiantRepository etudiantRepository;
     private final ExerciceRepository exerciceRepository;
     private final RelectureService relectureService;
+    private final RelectureRepository relectureRepository;
 
     public ExerciceService(SessionRepository sessionRepository,
                             EtudiantRepository etudiantRepository,
                             ExerciceRepository exerciceRepository,
-                            RelectureService relectureService) {
+                            RelectureService relectureService,
+                            RelectureRepository relectureRepository) {
         this.sessionRepository = sessionRepository;
         this.etudiantRepository = etudiantRepository;
         this.exerciceRepository = exerciceRepository;
         this.relectureService = relectureService;
+        this.relectureRepository = relectureRepository;
     }
 
     public Exercice deposerExercice(DeposerExerciceRequest requete) {
@@ -60,8 +67,32 @@ public class ExerciceService {
 
         Exercice exercice = new Exercice(session, etudiant, requete.lien(), Instant.now());
         exercice = exerciceRepository.save(exercice);
-        relectureService.assignerRelecteur(exercice);
+        relectureService.assignerRelecteurs(exercice);
         return exerciceRepository.save(exercice);
+    }
+
+    /**
+     * EF17, EF19 · RG17 (étape 3) — exercices d'un étudiant avec leur note
+     * finale (moyenne des relectures rendues, provisoire si toutes ne sont
+     * pas encore rendues), sans identité des relecteurs (RG8).
+     */
+    public List<ExerciceAvecNoteResponse> listerExercicesEtudiant(Long etudiantId) {
+        return exerciceRepository.findByEtudiant_Id(etudiantId).stream()
+                .map(this::avecNote)
+                .toList();
+    }
+
+    private ExerciceAvecNoteResponse avecNote(Exercice exercice) {
+        List<Relecture> toutes = relectureRepository.findByExercice_Id(exercice.getId());
+        List<Relecture> rendues = toutes.stream().filter(Relecture::dejaRendue).toList();
+
+        Double note = rendues.isEmpty() ? null
+                : rendues.stream().mapToInt(Relecture::getNote).average().orElseThrow();
+        boolean provisoire = !rendues.isEmpty() && rendues.size() < toutes.size();
+        List<String> commentaires = rendues.stream().map(Relecture::getCommentaire).toList();
+
+        return new ExerciceAvecNoteResponse(exercice.getId(), exercice.getSession().getId(), exercice.getLien(),
+                exercice.getStatut(), note, provisoire, commentaires);
     }
 
     private void validerLien(String lien) {

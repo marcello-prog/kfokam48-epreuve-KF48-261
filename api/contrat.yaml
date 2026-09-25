@@ -351,7 +351,12 @@ paths:
 
   /api/etudiants/{id}/exercices:
     get:
-      summary: Exercices déposés par un étudiant, avec la note/commentaire reçus si rendus (EF17, sans identité du relecteur — RG8)
+      summary: Exercices déposés par un étudiant, avec la note/commentaires reçus si rendus (EF17, EF19, sans identité des relecteurs — RG8)
+      description: |
+        Depuis l'étape 3 (RG6 révisée) : jusqu'à deux relectures par exercice.
+        `note` est la moyenne des relectures rendues (ou l'unique note
+        disponible), `provisoire` est vrai tant que moins de relectures sont
+        rendues que de relectures assignées (RG17).
       tags: [Exercices]
       parameters:
         - name: id
@@ -371,14 +376,18 @@ paths:
                 type: array
                 items:
                   type: object
-                  required: [id, sessionId, lien, statut]
+                  required: [id, sessionId, lien, statut, provisoire]
                   properties:
                     id: { type: integer, format: int64 }
                     sessionId: { type: integer, format: int64 }
                     lien: { type: string, format: uri }
                     statut: { type: string, enum: [DEPOSE, EN_ATTENTE_RELECTURE, RELU] }
-                    note: { type: integer, nullable: true }
-                    commentaire: { type: string, nullable: true }
+                    note: { type: number, nullable: true, description: "Moyenne des relectures rendues, ou note unique si une seule (RG17)" }
+                    provisoire: { type: boolean, description: "Vrai si des relectures assignées ne sont pas encore rendues" }
+                    commentaires:
+                      type: array
+                      description: "Commentaires des relectures rendues, sans identité des relecteurs (RG8)"
+                      items: { type: string }
         "404": { $ref: "#/components/responses/Erreur" }   # ETUDIANT_INCONNU
 
   /api/etudiants/{id}/relectures:
