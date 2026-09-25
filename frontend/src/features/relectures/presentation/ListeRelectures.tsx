@@ -24,16 +24,21 @@ export default function ListeRelectures({ etudiantId }: Props) {
     charger();
   }, [charger]);
 
-  if (chargement) return <p>Chargement des relectures...</p>;
-  if (erreur) return <p role="alert">{erreur}</p>;
+  if (chargement) return <p className="text-sm text-slate-500">Chargement des relectures...</p>;
+  if (erreur)
+    return (
+      <p role="alert" className="text-sm text-red-600">
+        {erreur}
+      </p>
+    );
 
   return (
-    <div>
-      <h2>Mes relectures assignées</h2>
+    <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+      <h2 className="mb-4 text-lg font-semibold text-slate-900">Mes relectures assignées</h2>
       {relectures.length === 0 ? (
-        <p>Aucune relecture assignée pour le moment.</p>
+        <p className="text-sm text-slate-500">Aucune relecture assignée pour le moment.</p>
       ) : (
-        <ul>
+        <ul className="space-y-4">
           {relectures.map((relecture) => (
             <RelectureItem key={relecture.id} relecture={relecture} onRendue={charger} />
           ))}

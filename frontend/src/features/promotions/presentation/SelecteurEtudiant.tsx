@@ -22,13 +22,23 @@ export default function SelecteurEtudiant({ value, onChange }: Props) {
       .finally(() => setChargement(false));
   }, []);
 
-  if (chargement) return <p>Chargement de la liste des étudiants...</p>;
-  if (erreur) return <p role="alert">{erreur}</p>;
+  if (chargement) return <p className="text-sm text-slate-500">Chargement de la liste des étudiants...</p>;
+  if (erreur)
+    return (
+      <p role="alert" className="text-sm text-red-600">
+        {erreur}
+      </p>
+    );
 
   return (
-    <label>
+    <label className="block max-w-xs text-sm font-medium text-slate-700">
       Mon nom
-      <select value={value ?? ""} onChange={(e) => onChange(Number(e.target.value))} required>
+      <select
+        value={value ?? ""}
+        onChange={(e) => onChange(Number(e.target.value))}
+        required
+        className="mt-1 block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+      >
         <option value="" disabled>
           -- choisir --
         </option>
