@@ -1,6 +1,5 @@
 import { useState, type FormEvent } from "react";
 import { marquerPresence } from "../data/presencesApi";
-import SelecteurEtudiant from "../../promotions/presentation/SelecteurEtudiant";
 import { ApiError } from "../../../api/client";
 
 const MESSAGES_ERREUR: Record<string, string> = {
@@ -9,8 +8,12 @@ const MESSAGES_ERREUR: Record<string, string> = {
   DEJA_PRESENT: "Vous avez déjà marqué votre présence pour cette session.",
 };
 
-export default function MarquerPresenceForm() {
-  const [etudiantId, setEtudiantId] = useState<number | null>(null);
+interface Props {
+  etudiantId: number;
+  onSucces: (sessionId: number) => void;
+}
+
+export default function MarquerPresenceForm({ etudiantId, onSucces }: Props) {
   const [code, setCode] = useState("");
   const [chargement, setChargement] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
@@ -18,14 +21,13 @@ export default function MarquerPresenceForm() {
 
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
-    if (!etudiantId) return;
-
     setChargement(true);
     setErreur(null);
     setConfirme(false);
     try {
-      await marquerPresence({ code, etudiantId });
+      const presence = await marquerPresence({ code, etudiantId });
       setConfirme(true);
+      onSucces(presence.sessionId);
     } catch (e) {
       if (e instanceof ApiError) {
         setErreur(MESSAGES_ERREUR[e.code] ?? e.message);
@@ -41,12 +43,11 @@ export default function MarquerPresenceForm() {
     <div>
       <h2>Marquer ma présence</h2>
       <form onSubmit={onSubmit}>
-        <SelecteurEtudiant value={etudiantId} onChange={setEtudiantId} />
         <label>
           Code de présence
           <input value={code} onChange={(e) => setCode(e.target.value)} required />
         </label>
-        <button type="submit" disabled={chargement || !etudiantId}>
+        <button type="submit" disabled={chargement}>
           {chargement ? "Envoi..." : "Marquer ma présence"}
         </button>
       </form>
