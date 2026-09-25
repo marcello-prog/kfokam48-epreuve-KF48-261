@@ -9,6 +9,7 @@ import cm.kfokam48.suivi.exception.ApiException;
 import cm.kfokam48.suivi.repository.EtudiantRepository;
 import cm.kfokam48.suivi.repository.PresenceRepository;
 import cm.kfokam48.suivi.repository.SessionRepository;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -57,6 +58,15 @@ public class PresenceService {
         }
 
         Presence presence = new Presence(session, etudiant, SourcePresence.ETUDIANT, Instant.now());
-        return presenceRepository.save(presence);
+        try {
+            return presenceRepository.save(presence);
+        } catch (DataIntegrityViolationException e) {
+            // Course entre la vérification ci-dessus et l'insertion (bug #25) :
+            // une requête concurrente a inséré la présence entre-temps. La
+            // contrainte UNIQUE (session_id, etudiant_id) est la source de
+            // vérité ultime ; on la traduit en la même erreur 409 propre.
+            throw new ApiException(HttpStatus.CONFLICT, "DEJA_PRESENT",
+                    "Vous avez déjà marqué votre présence.");
+        }
     }
 }
