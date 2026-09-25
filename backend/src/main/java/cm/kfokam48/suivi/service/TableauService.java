@@ -13,7 +13,10 @@ import cm.kfokam48.suivi.repository.RelectureRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * EF16 · RG16 — tableau récapitulatif du formateur : présences, exercices
@@ -56,10 +59,18 @@ public class TableauService {
         long presences = presenceRepository.countByEtudiant_Id(etudiant.getId());
         long exercicesDeposes = exerciceRepository.countByEtudiant_Id(etudiant.getId());
 
+        // RG17 (étape 3) : la moyenne agrège une note finale PAR EXERCICE (moyenne
+        // de ses relectures rendues), pas une par relecture individuelle — sinon un
+        // exercice à deux relectures pèserait deux fois plus qu'un exercice à une.
         List<Relecture> relecturesRecues = relectureRepository
                 .findByExercice_Etudiant_IdAndStatut(etudiant.getId(), StatutRelecture.RENDUE);
-        Double moyenne = relecturesRecues.isEmpty() ? null
-                : relecturesRecues.stream().mapToInt(Relecture::getNote).average().orElseThrow();
+        Map<Long, List<Relecture>> parExercice = relecturesRecues.stream()
+                .collect(Collectors.groupingBy(r -> r.getExercice().getId()));
+        Collection<Double> notesFinalesParExercice = parExercice.values().stream()
+                .map(rs -> rs.stream().mapToInt(Relecture::getNote).average().orElseThrow())
+                .toList();
+        Double moyenne = notesFinalesParExercice.isEmpty() ? null
+                : notesFinalesParExercice.stream().mapToDouble(Double::doubleValue).average().orElseThrow();
 
         long relecturesEnAttente = relectureRepository
                 .countByRelecteur_IdAndStatut(etudiant.getId(), StatutRelecture.EN_ATTENTE);
