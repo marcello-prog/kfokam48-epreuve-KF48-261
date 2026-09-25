@@ -1,0 +1,21 @@
+spring:
+  application:
+    name: backend-test
+  datasource:
+    url: jdbc:h2:mem:kfokam48-test;MODE=PostgreSQL;DB_CLOSE_DELAY=-1
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+  flyway:
+    locations: classpath:db/migration
+    baseline-on-migrate: false
+
+kfokam48:
+  presence:
+    expiration-minutes: 15
+    max-tentatives: 5
+    blocage-minutes: 2
