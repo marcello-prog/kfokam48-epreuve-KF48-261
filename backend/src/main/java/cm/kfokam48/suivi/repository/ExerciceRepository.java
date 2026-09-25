@@ -8,4 +8,6 @@ import java.util.Optional;
 public interface ExerciceRepository extends JpaRepository<Exercice, Long> {
 
     Optional<Exercice> findBySession_IdAndEtudiant_Id(Long sessionId, Long etudiantId);
+
+    long countByEtudiant_Id(Long etudiantId);
 }
