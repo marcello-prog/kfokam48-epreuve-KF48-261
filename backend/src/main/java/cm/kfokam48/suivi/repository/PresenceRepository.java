@@ -10,4 +10,6 @@ public interface PresenceRepository extends JpaRepository<Presence, Long> {
     boolean existsBySession_IdAndEtudiant_Id(Long sessionId, Long etudiantId);
 
     List<Presence> findBySession_Id(Long sessionId);
+
+    long countByEtudiant_Id(Long etudiantId);
 }
