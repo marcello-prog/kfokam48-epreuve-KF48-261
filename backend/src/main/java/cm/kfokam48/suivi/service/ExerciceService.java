@@ -25,13 +25,16 @@ public class ExerciceService {
     private final SessionRepository sessionRepository;
     private final EtudiantRepository etudiantRepository;
     private final ExerciceRepository exerciceRepository;
+    private final RelectureService relectureService;
 
     public ExerciceService(SessionRepository sessionRepository,
                             EtudiantRepository etudiantRepository,
-                            ExerciceRepository exerciceRepository) {
+                            ExerciceRepository exerciceRepository,
+                            RelectureService relectureService) {
         this.sessionRepository = sessionRepository;
         this.etudiantRepository = etudiantRepository;
         this.exerciceRepository = exerciceRepository;
+        this.relectureService = relectureService;
     }
 
     public Exercice deposerExercice(DeposerExerciceRequest requete) {
@@ -51,6 +54,8 @@ public class ExerciceService {
         }
 
         Exercice exercice = new Exercice(session, etudiant, requete.lien(), Instant.now());
+        exercice = exerciceRepository.save(exercice);
+        relectureService.assignerRelecteur(exercice);
         return exerciceRepository.save(exercice);
     }
 
