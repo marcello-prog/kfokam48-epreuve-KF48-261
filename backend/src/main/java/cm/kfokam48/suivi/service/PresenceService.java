@@ -15,8 +15,8 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 
 /**
- * EF2-4 · RG1-3 — marquage de présence par code, avec ses trois cas d'erreur
- * (code inconnu, code expiré, déjà présent).
+ * EF2-4 · RG1-3, RG15 — marquage de présence par code, avec ses cas
+ * d'erreur (code inconnu, session clôturée, code expiré, déjà présent).
  */
 @Service
 public class PresenceService {
@@ -37,6 +37,11 @@ public class PresenceService {
         Session session = sessionRepository.findByCode(requete.code())
                 .orElseThrow(() -> new ApiException(HttpStatus.BAD_REQUEST, "CODE_INCONNU",
                         "Ce code de présence n'existe pas."));
+
+        if (session.estCloturee()) {
+            throw new ApiException(HttpStatus.CONFLICT, "SESSION_CLOTUREE",
+                    "Cette session est clôturée, plus aucune présence n'est possible.");
+        }
 
         if (session.estExpiree(Instant.now())) {
             throw new ApiException(HttpStatus.GONE, "CODE_EXPIRE", "Le code de présence a expiré.");

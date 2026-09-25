@@ -60,6 +60,25 @@ public class SessionService {
         return sessionRepository.save(session);
     }
 
+    /**
+     * EF15 · RG15 — clôture d'une session, verrouillant présences, dépôts
+     * d'exercices et relectures (trou comblé — cf. cahier des charges
+     * section 7).
+     */
+    public Session cloturerSession(Long id) {
+        Session session = sessionRepository.findById(id)
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "SESSION_INCONNUE",
+                        "Aucune session ne correspond à cet identifiant."));
+
+        if (session.estCloturee()) {
+            throw new ApiException(HttpStatus.CONFLICT, "SESSION_DEJA_CLOTUREE",
+                    "Cette session est déjà clôturée.");
+        }
+
+        session.cloturer(Instant.now());
+        return sessionRepository.save(session);
+    }
+
     private String genererCodeUnique() {
         String code;
         do {

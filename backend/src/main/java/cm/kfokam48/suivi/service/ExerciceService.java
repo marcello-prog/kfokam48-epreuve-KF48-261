@@ -16,8 +16,8 @@ import java.net.URISyntaxException;
 import java.time.Instant;
 
 /**
- * EF7-8 · RG12 — dépôt du lien d'un exercice, jusqu'à la clôture de la
- * session (la vérification de clôture arrive avec l'issue #10).
+ * EF7-8 · RG12, RG15 — dépôt du lien d'un exercice, jusqu'à la clôture de
+ * la session.
  */
 @Service
 public class ExerciceService {
@@ -45,6 +45,11 @@ public class ExerciceService {
         Etudiant etudiant = etudiantRepository.findById(requete.etudiantId())
                 .orElseThrow(() -> new ApiException(HttpStatus.BAD_REQUEST, "ETUDIANT_INCONNU",
                         "Aucun étudiant ne correspond à cet identifiant."));
+
+        if (session.estCloturee()) {
+            throw new ApiException(HttpStatus.CONFLICT, "SESSION_CLOTUREE",
+                    "Cette session est clôturée, aucun dépôt n'est plus possible.");
+        }
 
         validerLien(requete.lien());
 
