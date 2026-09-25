@@ -1,4 +1,4 @@
-import { post } from "../../../api/client";
+import { patch, post } from "../../../api/client";
 
 export interface OuvrirSessionRequest {
   titre: string;
@@ -12,6 +12,16 @@ export interface SessionResponse {
   expirationAt: string;
 }
 
+export interface SessionClotureResponse {
+  id: number;
+  statut: "OUVERTE" | "EXPIREE" | "CLOTUREE";
+  clotureAt: string;
+}
+
 export function ouvrirSession(payload: OuvrirSessionRequest): Promise<SessionResponse> {
   return post<SessionResponse>("/api/sessions", payload);
+}
+
+export function cloturerSession(id: number): Promise<SessionClotureResponse> {
+  return patch<SessionClotureResponse>(`/api/sessions/${id}/cloture`);
 }

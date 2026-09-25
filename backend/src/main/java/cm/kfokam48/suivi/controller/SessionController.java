@@ -1,12 +1,15 @@
 package cm.kfokam48.suivi.controller;
 
 import cm.kfokam48.suivi.dto.OuvrirSessionRequest;
+import cm.kfokam48.suivi.dto.SessionClotureResponse;
 import cm.kfokam48.suivi.dto.SessionResponse;
 import cm.kfokam48.suivi.entity.Session;
 import cm.kfokam48.suivi.service.SessionService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,5 +29,11 @@ public class SessionController {
     public ResponseEntity<SessionResponse> ouvrirSession(@Valid @RequestBody OuvrirSessionRequest requete) {
         Session session = sessionService.ouvrirSession(requete);
         return ResponseEntity.status(HttpStatus.CREATED).body(SessionResponse.from(session));
+    }
+
+    @PatchMapping("/{id}/cloture")
+    public SessionClotureResponse cloturerSession(@PathVariable Long id) {
+        Session session = sessionService.cloturerSession(id);
+        return SessionClotureResponse.from(session);
     }
 }

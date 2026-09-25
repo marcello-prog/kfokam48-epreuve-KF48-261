@@ -7,7 +7,11 @@ import { ApiError } from "../../../api/client";
 // multi-promotion apparaît (cf. enveloppe étape 3).
 const PROMOTION_ID = 1;
 
-export default function OuvrirSessionForm() {
+interface Props {
+  onSucces: (session: SessionResponse) => void;
+}
+
+export default function OuvrirSessionForm({ onSucces }: Props) {
   const [titre, setTitre] = useState("");
   const [chargement, setChargement] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
@@ -20,6 +24,7 @@ export default function OuvrirSessionForm() {
     try {
       const resultat = await ouvrirSession({ titre, promotionId: PROMOTION_ID });
       setSession(resultat);
+      onSucces(resultat);
     } catch (e) {
       setErreur(e instanceof ApiError ? e.message : "Une erreur est survenue.");
     } finally {
