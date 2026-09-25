@@ -2,6 +2,7 @@ import { useState } from "react";
 import SelecteurEtudiant from "../features/promotions/presentation/SelecteurEtudiant";
 import MarquerPresenceForm from "../features/presences/presentation/MarquerPresenceForm";
 import DeposerExerciceForm from "../features/exercices/presentation/DeposerExerciceForm";
+import MaNote from "../features/exercices/presentation/MaNote";
 
 export default function EtudiantScreen() {
   const [etudiantId, setEtudiantId] = useState<number | null>(null);
@@ -15,6 +16,8 @@ export default function EtudiantScreen() {
       {etudiantId && <MarquerPresenceForm etudiantId={etudiantId} onSucces={setSessionId} />}
 
       {etudiantId && sessionId && <DeposerExerciceForm etudiantId={etudiantId} sessionId={sessionId} />}
+
+      {etudiantId && <MaNote etudiantId={etudiantId} refreshSignal={sessionId} />}
     </section>
   );
 }
