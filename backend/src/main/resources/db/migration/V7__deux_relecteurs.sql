@@ -27,3 +27,12 @@ INSERT INTO relecture (id, exercice_id, relecteur_id, note, commentaire, statut,
 SELECT id, exercice_id, relecteur_id, note, commentaire, statut, rendue_at FROM relecture_v6;
 
 DROP TABLE relecture_v6;
+
+-- Les id copiés ci-dessus sont explicites : le compteur d'identité de la
+-- nouvelle table ne les connaît pas et repartirait de 1, collisionnant avec
+-- les lignes déjà copiées. RESTART WITH n'accepte pas de sous-requête de
+-- façon portable entre Postgres et H2 : on redémarre donc à une valeur
+-- large, très au-delà de tout id réaliste pour cet exercice (largement
+-- suffisant, pas une solution générale de recalage de séquence en
+-- production sur un très gros volume).
+ALTER TABLE relecture ALTER COLUMN id RESTART WITH 100000;
