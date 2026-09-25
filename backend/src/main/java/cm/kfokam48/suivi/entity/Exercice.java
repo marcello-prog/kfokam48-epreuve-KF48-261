@@ -81,4 +81,8 @@ public class Exercice {
     public void assignerRelecteur() {
         this.statut = StatutExercice.EN_ATTENTE_RELECTURE;
     }
+
+    public void marquerRelu() {
+        this.statut = StatutExercice.RELU;
+    }
 }

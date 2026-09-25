@@ -1,8 +1,15 @@
+import { useState } from "react";
+import SelecteurEtudiant from "../features/promotions/presentation/SelecteurEtudiant";
+import ListeRelectures from "../features/relectures/presentation/ListeRelectures";
+
 export default function RelecteurScreen() {
+  const [etudiantId, setEtudiantId] = useState<number | null>(null);
+
   return (
     <section>
       <h1>Relecteur</h1>
-      <p>Consulter ses relectures assignées, noter et commenter un exercice.</p>
+      <SelecteurEtudiant value={etudiantId} onChange={setEtudiantId} />
+      {etudiantId && <ListeRelectures etudiantId={etudiantId} />}
     </section>
   );
 }
