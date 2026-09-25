@@ -14,8 +14,8 @@ export default function FormateurScreen() {
   }
 
   return (
-    <section>
-      <h1>Formateur</h1>
+    <section className="space-y-6 py-8">
+      <h1 className="text-2xl font-semibold text-slate-900">Formateur</h1>
       <OuvrirSessionForm onSucces={onSessionOuverte} />
       {session && (
         <ClotureSessionButton sessionId={session.id} onClotureee={() => setRafraichissement((n) => n + 1)} />

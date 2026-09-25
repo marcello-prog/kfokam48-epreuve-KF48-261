@@ -8,8 +8,8 @@ export default function EtudiantScreen() {
   const [sessionId, setSessionId] = useState<number | null>(null);
 
   return (
-    <section>
-      <h1>Étudiant</h1>
+    <section className="space-y-6 py-8">
+      <h1 className="text-2xl font-semibold text-slate-900">Étudiant</h1>
       <SelecteurEtudiant value={etudiantId} onChange={setEtudiantId} />
 
       {etudiantId && <MarquerPresenceForm etudiantId={etudiantId} onSucces={setSessionId} />}

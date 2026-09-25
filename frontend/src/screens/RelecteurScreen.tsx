@@ -6,8 +6,8 @@ export default function RelecteurScreen() {
   const [etudiantId, setEtudiantId] = useState<number | null>(null);
 
   return (
-    <section>
-      <h1>Relecteur</h1>
+    <section className="space-y-6 py-8">
+      <h1 className="text-2xl font-semibold text-slate-900">Relecteur</h1>
       <SelecteurEtudiant value={etudiantId} onChange={setEtudiantId} />
       {etudiantId && <ListeRelectures etudiantId={etudiantId} />}
     </section>
