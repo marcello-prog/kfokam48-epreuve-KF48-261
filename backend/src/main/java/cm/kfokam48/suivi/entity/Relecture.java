@@ -10,6 +10,8 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
+import java.time.Instant;
+
 @Entity
 @Table(name = "relecture")
 public class Relecture {
@@ -32,6 +34,8 @@ public class Relecture {
 
     @Enumerated(EnumType.STRING)
     private StatutRelecture statut;
+
+    private Instant rendueAt;
 
     protected Relecture() {
     }
@@ -64,5 +68,24 @@ public class Relecture {
 
     public StatutRelecture getStatut() {
         return statut;
+    }
+
+    public Instant getRendueAt() {
+        return rendueAt;
+    }
+
+    public boolean estAuteurDeExercice(Etudiant candidat) {
+        return exercice.getEtudiant().getId().equals(candidat.getId());
+    }
+
+    public boolean dejaRendue() {
+        return statut == StatutRelecture.RENDUE;
+    }
+
+    public void rendre(Integer note, String commentaire, Instant rendueAt) {
+        this.note = note;
+        this.commentaire = commentaire;
+        this.statut = StatutRelecture.RENDUE;
+        this.rendueAt = rendueAt;
     }
 }
