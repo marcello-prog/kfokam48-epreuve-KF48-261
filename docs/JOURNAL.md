@@ -26,3 +26,15 @@
 - Le contrat d'API vérifié à la main contre `api/contrat.yaml` pour chaque endpoint (codes de statut, codes d'erreur exacts).
 - Le chemin de démarrage du README testé depuis un vrai clone du dépôt distant, pas depuis mon répertoire de travail — c'est ce test qui a révélé l'incident de port ci-dessus.
 
+## Étape 3 — Enveloppe (bug + changement de besoin)
+
+**Fait** :
+- Bug (course de présence concurrente) : issue #25 ouverte en traduisant le rapport client en cause technique (race condition check-then-act) *avant* tout code, test de concurrence écrit et exécuté — a échoué en démontrant la violation SQL brute qui fuit — puis correctif (capture de `DataIntegrityViolationException`, traduite en 409 propre), test relancé — passe. Branche et PR séparées du changement de besoin.
+- Changement de besoin (deux relecteurs) : cahier des charges et D2 mis à jour *avant* le contrat et le code (RG6 révisée, nouvelles RG17/RG7bis, EF10 révisée, nouvelle EF19), `api/contrat.yaml` mis à jour, migration V7 additive (V6 jamais modifiée), issues #27 et #28 ouvertes. Branche et PR séparées du bug.
+
+**Re-priorisation et sacrifice de périmètre** : ce Must tardif (deux relecteurs) a un coût réel en temps qui doit être compensé. Je sacrifie explicitement les quatre stories `Should` jamais attaquées depuis la v0.1 — EF5 (blocage après 5 erreurs), EF6 (présence manuelle par le formateur), EF9 (remplacer le lien d'un exercice), EF14 (corriger une relecture déjà rendue) — elles ne seront pas tentées non plus à l'étape 4. Elles restent dans le backlog GitHub, non fermées, priorité inchangée, pour rester visibles et honnêtes plutôt que supprimées silencieusement. Le temps ainsi protégé va à la finalisation propre de la v1.0 (CHANGELOG, backlog trié) et à la soumission, qui pèsent plus lourd au barème que des Should supplémentaires.
+
+**Bloqué** : la contrainte `UNIQUE(exercice_id)` posée par V6 a un nom généré automatiquement différent entre H2 (`CONSTRAINT_54`, séquentiel donc imprévisible) et PostgreSQL (`relecture_exercice_id_key`, convention `table_colonne_key`) — un `DROP CONSTRAINT <nom>` n'aurait donc pas été portable. Vérifié empiriquement (petit programme Java autonome contre H2 en mode PostgreSQL) avant de choisir la solution portable : renommer l'ancienne table, recréer avec la bonne contrainte, copier les données, supprimer l'ancienne — testée avec succès contre H2 *et* contre le Postgres réel déjà rempli par toute la session de tests précédente.
+
+**IA** : utilisée pour rédiger le test de concurrence (issue #25) et pour la migration V7. Vérifications : le test de course a été **exécuté avant** le correctif pour confirmer qu'il échouait réellement (pas supposé) ; la migration a été testée contre les deux moteurs réellement utilisés (H2 des tests, Postgres réel) plutôt que relue seulement — c'est ce qui a révélé le problème de nom de contrainte non portable, invisible à la simple lecture du SQL.
+
